@@ -117,7 +117,7 @@ class Handler(FileSystemEventHandler):
 
         elif event.event_type == 'modified':
             # Taken any action here when a file is modified.
-            print("Received modified event 👀 - %s." % event.src_path)
+            # print("Received modified event 👀 - %s." % event.src_path)
             try:
                 parse_and_send_txt(event.src_path)
             except Exception as e:
