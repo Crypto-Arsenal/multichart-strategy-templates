@@ -1,0 +1,5 @@
+WATCH_DIR: Z:\CA Test # Your directory that OrderMaster writes too
+STRATEGIES:
+    BTC_ATQT01.txt: # Your file name produced by OrderMaster
+        connectorName: connectorName
+        connectorToken: connectorToken
