@@ -4,6 +4,7 @@ class Strategy(StrategyBase):
         self.subscribed_books = {}
         self.options = {}
         self.curTotalPosition = None
+        self.ORDER_PORTION = 0.1
 
     def on_tradingview_signal(self, signal, candles):
         exchange, pair, base, quote = CA.get_exchange_pair()
@@ -45,34 +46,42 @@ class Strategy(StrategyBase):
         if self.curTotalPosition > self.newPosition:
             if self.newPosition >= 0:
                 # 3 -> 2
-                amount = self.curTotalPosition - self.newPosition
+                amount = (self.curTotalPosition - self.newPosition) * self.ORDER_PORTION
+                CA.log("Amount to close long: " + str(amount))
                 CA.close_long(exchange, pair, amount, CA.OrderType.MARKET)
             else:
                 # 2 -> -1
                 if self.curTotalPosition > 0:
                     # "closeLong/openShort"
-                    close_long_amount = self.curTotalPosition
-                    open_short_amount = abs(self.newPosition)
+                    close_long_amount = self.curTotalPosition * self.ORDER_PORTION
+                    open_short_amount = abs(self.newPosition) * self.ORDER_PORTION
+                    CA.log("Amount to close long: " + str(close_long_amount))
+                    CA.log("Amount to open short: " + str(open_short_amount))
                     CA.place_order(exchange, pair, action='close_long', amount=close_long_amount, conditional_order_type='OTO', child_conditional_orders=[{
                         'action': 'open_short', 'amount': open_short_amount
                     }])
                 else:
                     # -3 -> -2 = 1
-                    amount = abs(self.newPosition - self.curTotalPosition)
+                    amount = abs(self.newPosition - self.curTotalPosition) * self.ORDER_PORTION
+                    CA.log("Amount to open short: " + str(amount))
                     CA.open_short(exchange, pair, amount, CA.OrderType.MARKET)
         else:
             if self.newPosition <= 0:
                 #  -3 -> -1
-                amount = abs(self.curTotalPosition - self.newPosition)
+                amount = abs(self.curTotalPosition - self.newPosition) * self.ORDER_PORTION
+                CA.log("Amount to close short: " + str(amount))
                 CA.close_short(exchange, pair, amount, CA.OrderType.MARKET)
             else:
                 if self.curTotalPosition >= 0:
                     # 1 -> 2
-                    amount = self.curTotalPosition - self.newPosition
+                    amount = (self.curTotalPosition - self.newPosition) * self.ORDER_PORTION
+                    CA.log("Amount to open long: " + str(amount))
                     CA.open_long(exchange, pair, amount, CA.OrderType.MARKET)
                 else:
-                    close_short_amount = self.curTotalPosition
-                    open_long_amount = abs(self.newPosition)
+                    close_short_amount = self.curTotalPosition * self.ORDER_PORTION
+                    open_long_amount = abs(self.newPosition)  * self.ORDER_PORTION
+                    CA.log("Amount to close short: " + str(close_short_amount))
+                    CA.log("Amount to open long: " + str(open_long_amount))
                     CA.place_order(exchange, pair, action='close_short', amount=close_short_amount, conditional_order_type='OTO', child_conditional_orders=[{
                         'action': 'open_long', 'amount': open_long_amount
                     }])
